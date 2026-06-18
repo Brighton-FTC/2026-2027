@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp
-public class DrivetrainTeleOp extends OpMode {
+public class fieldTeleOp extends OpMode {
     private DcMotor fl;
     private DcMotor fr;
     private DcMotor bl;
@@ -28,6 +28,9 @@ public class DrivetrainTeleOp extends OpMode {
 
         imu = hardwareMap.get(IMU.class, "imu");
 
+        fl.setDirection(DcMotor.Direction.REVERSE);
+        bl.setDirection(DcMotor.Direction.REVERSE);
+
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
                 RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
@@ -38,22 +41,31 @@ public class DrivetrainTeleOp extends OpMode {
     public void loop(){
         double ly = -gamepad1.left_stick_y;
         double lx = gamepad1.left_stick_x * 1.1;
-        double rx = gamepad1.right_stick_y;
+        double rx = gamepad1.right_stick_x;
+
+
         if (gamepad1.options) {
             imu.resetYaw();
         }
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        double rotX = lx * Math.cos(-botHeading) - ly * Math.sin(-botHeading);
-        double rotY = lx * Math.sin(-botHeading) + ly * Math.cos(-botHeading);
-        rotX = rotX * 1.1;
-        double denominator = Math.max(Math.abs(ly) + Math.abs(lx) + Math.abs(rx), 1);
+        double rotX = ly * Math.sin(-botHeading) + lx * Math.cos(-botHeading);
+        double rotY = ly * Math.cos(-botHeading) - lx * Math.sin(-botHeading);
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
 
 
         fl.setPower((rotY + rotX + rx) / denominator);
-        fr.setPower((rotY - rotX + rx) / denominator);
-        bl.setPower((rotY + rotX - rx) / denominator);
-        br.setPower((rotY - rotX - rx) / denominator);
+        fr.setPower((rotY - rotX - rx) / denominator);
+        bl.setPower((rotY - rotX + rx) / denominator);
+        br.setPower((rotY + rotX - rx) / denominator);
+
+        telemetry.addData("ly", ly);
+        telemetry.addData("lx", lx);
+        telemetry.addData("rx", rx);
+        telemetry.addData("fl power", fl.getPower());
+        telemetry.addLine("updated");
+        
+        telemetry.update();
 
     }
 
