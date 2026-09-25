@@ -11,22 +11,31 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp
 public class generalTeleOp extends OpMode {
+
+    // assign the motors
     private DcMotor fl;
     private DcMotor fr;
     private DcMotor bl;
     private DcMotor br;
     private boolean isFieldCentric;
+    private boolean slowMode;
+    double speedMultiplier;
 
     private boolean lastCircleState = false;
+    private boolean lastSquareState;
 
     private IMU imu;
 
-    //private flyWheel fW;
+    private flyWheel fW;
+
+    private intake intake;
 
 
     @Override
     public void init() {
-        //fW = new flyWheel(hardwareMap);
+        // assign the motors to the hardware map
+//        fW = new flyWheel(hardwareMap);
+//        intake = new intake(hardwareMap);
         fl = hardwareMap.dcMotor.get("fl");
         fr = hardwareMap.dcMotor.get("fr");
         bl = hardwareMap.dcMotor.get("bl");
@@ -44,15 +53,20 @@ public class generalTeleOp extends OpMode {
     }
 
     @Override
-    public void loop(){
-        double ly = -gamepad1.left_stick_y;
-        double lx = gamepad1.left_stick_x;
-        double rx = gamepad1.right_stick_x;
+    public void loop() {
+        double ly = -gamepad1.left_stick_y * speedMultiplier;
+        double lx = gamepad1.left_stick_x * speedMultiplier;
+        double rx = gamepad1.right_stick_x * speedMultiplier;
 
         if (gamepad1.circle && !lastCircleState) {
             isFieldCentric = !isFieldCentric;
         }
+        if (gamepad1.square && !lastSquareState) {
+            slowMode = !slowMode;
+        }
         lastCircleState = gamepad1.circle;
+        lastSquareState = gamepad1.square;
+        speedMultiplier = slowMode ? 0.4 : 1.0;
 
         if (gamepad1.options) {
             imu.resetYaw();
@@ -78,6 +92,7 @@ public class generalTeleOp extends OpMode {
         }
 
         telemetry.addData("teleOp type", isFieldCentric ? "fieldTeleOp" : "robotTeleOp");
+        telemetry.addData("slowMode enabled", slowMode);
         telemetry.addData("ly", ly);
         telemetry.addData("lx", lx);
         telemetry.addData("rx", rx);
@@ -86,7 +101,7 @@ public class generalTeleOp extends OpMode {
         telemetry.addData("bl power", bl.getPower());
         telemetry.addData("br power", br.getPower());
         telemetry.addLine("updated");
-        
+
         telemetry.update();
 
     }

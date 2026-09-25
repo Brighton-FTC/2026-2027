@@ -3,16 +3,15 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+public class intake {
+    public DcMotorEx motor;
 
-public class flyWheel {
 
-    final private DcMotorEx motor;
-
-    public flyWheel (HardwareMap hw) {
-        motor = hw.get(DcMotorEx.class, "fW");
+    public intake(HardwareMap hw) {
+        motor = hw.get(DcMotorEx.class, "int");
     }
 
-    public void setPower (double power) {
+    public void setMotor(double power) {
         motor.setPower(power);
     }
 
